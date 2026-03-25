@@ -1,5 +1,5 @@
 package com.example.demo01.data.entity;
-
+//
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
