@@ -10,3 +10,56 @@ Tạo hóa đơn (phải đăng nhập)
 Dữ liệu được lưu bằng Room Database, trạng thái đăng nhập lưu bằng SharedPreferences.
 Có 5 bảng: Users, Categories, Products, OrderDetails, Orders
 Trong đó các mối quan hệ có thể như sau:
+Có thể thêm cứng 1 số dữ liệu cho các bảng.
+Luồng dữ liệu trong hệ thống:
+Start App
+   │
+   ▼
+Home Screen
+   │
+   ├── Login
+   │
+   ├── Xem danh sách Products
+   │
+   ├── Xem Categories
+   │
+   └── Xem chi tiết Product
+            │
+            ▼
+        Chọn sản phẩm (Nhặt hàng)
+            │
+            ▼
+    Kiểm tra đăng nhập?
+        │
+   ┌────┴────┐
+   │         │
+  No        Yes
+   │         │
+   ▼         ▼
+Login     Tạo Order (nếu chưa có)
+   │         │
+   ▼         ▼
+Login thành công
+   │
+   ▼
+Tạo Order (nếu chưa có)
+   │
+   ▼
+Tạo OrderDetails (thêm sản phẩm đã chọn)
+   │
+   ▼
+Có tiếp tục chọn sản phẩm?
+   │
+   ├── Yes → quay lại danh sách Products
+   │
+   └── No
+          │
+          ▼
+      Thanh toán (Checkout)
+          │
+          ▼
+   Cập nhật trạng thái Order (Paid)
+          │
+          ▼
+Hiển thị hóa đơn
+
