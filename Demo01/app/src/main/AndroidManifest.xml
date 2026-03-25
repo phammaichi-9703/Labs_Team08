@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:allowBackup="true1111"
+        android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -30,9 +30,13 @@
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity2"
+            android:name=".ProductDetailActivity"
             android:exported="false" />
 
-    </application>
+        <activity
+            android:name=".OrderActivity"
+            android:exported="false" />
+
+    </activity>
 
 </manifest>
