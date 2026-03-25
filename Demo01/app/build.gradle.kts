@@ -4,16 +4,12 @@ plugins {
 
 android {
     namespace = "com.example.demo01"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.demo01"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -45,4 +41,10 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    // Room dependencies
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    // Optional - Kotlin Extensions and Coroutines support for Room
+    // implementation(libs.room.ktx)
 }
