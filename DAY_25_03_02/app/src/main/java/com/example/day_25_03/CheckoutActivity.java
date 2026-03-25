@@ -1,7 +1,6 @@
 package com.example.day_25_03;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,9 +20,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class CheckoutActivity extends AppCompatActivity {
+
     private RecyclerView rvCartItems;
     private TextView tvTotalAmount;
     private MaterialButton btnPay;
+
     private AppDatabase db;
     private UserSession session;
     private Order pendingOrder;
@@ -33,62 +34,96 @@ public class CheckoutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        db = AppDatabase.getInstance(this);
-        session = new UserSession(this);
+        initViews();
+        initData();
+        setupToolbar();
+        setupRecyclerView();
+        loadInvoice();
+        setupActions();
+    }
 
-        Toolbar toolbar = findViewById(R.id.toolbar_checkout);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
+    private void initViews() {
         rvCartItems = findViewById(R.id.rvCartItems);
         tvTotalAmount = findViewById(R.id.tvTotalAmount);
         btnPay = findViewById(R.id.btnPay);
+    }
 
+    private void initData() {
+        db = AppDatabase.getInstance(this);
+        session = new UserSession(this);
+    }
+
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar_checkout);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    private void setupRecyclerView() {
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
+    }
 
-        loadInvoice();
-
-        btnPay.setOnClickListener(v -> {
-            if (pendingOrder != null) {
-                // Change status to Paid
-                pendingOrder.status = "Paid";
-                db.shopDao().updateOrder(pendingOrder);
-                
-                Toast.makeText(this, "Payment Successful! Items removed from current invoice.", Toast.LENGTH_LONG).show();
-                
-                // Finish and go back
-                finish();
-            }
-        });
+    private void setupActions() {
+        btnPay.setOnClickListener(v -> handlePayment());
     }
 
     private void loadInvoice() {
         int userId = session.getUserId();
         pendingOrder = db.shopDao().getPendingOrderByUser(userId);
 
-        if (pendingOrder != null) {
-            List<OrderDetail> details = db.shopDao().getOrderDetailsByOrder(pendingOrder.id);
-            if (details.isEmpty()) {
-                showEmptyInvoice();
-            } else {
-                OrderDetailAdapter adapter = new OrderDetailAdapter(details, db);
-                rvCartItems.setAdapter(adapter);
-                tvTotalAmount.setText(String.format(Locale.getDefault(), "$%.2f", pendingOrder.totalAmount));
-                btnPay.setEnabled(true);
-                btnPay.setAlpha(1.0f);
-            }
-        } else {
+        if (pendingOrder == null) {
             showEmptyInvoice();
+            return;
         }
+
+        List<OrderDetail> details = db.shopDao().getOrderDetailsByOrder(pendingOrder.id);
+
+        if (details == null || details.isEmpty()) {
+            showEmptyInvoice();
+            return;
+        }
+
+        displayInvoice(details);
+    }
+
+    private void displayInvoice(List<OrderDetail> details) {
+        OrderDetailAdapter adapter = new OrderDetailAdapter(details, db);
+        rvCartItems.setAdapter(adapter);
+
+        tvTotalAmount.setText(formatPrice(pendingOrder.totalAmount));
+        setPayButtonState(true);
+    }
+
+    private void handlePayment() {
+        if (pendingOrder == null) return;
+
+        pendingOrder.status = "Paid";
+        db.shopDao().updateOrder(pendingOrder);
+
+        showToast("Payment Successful! Items removed from current invoice.");
+        finish();
     }
 
     private void showEmptyInvoice() {
-        tvTotalAmount.setText("$0.00");
-        btnPay.setEnabled(false);
-        btnPay.setAlpha(0.5f);
-        Toast.makeText(this, "Your current invoice is empty", Toast.LENGTH_SHORT).show();
+        tvTotalAmount.setText(formatPrice(0));
+        setPayButtonState(false);
+        showToast("Your current invoice is empty");
+    }
+
+    private void setPayButtonState(boolean enabled) {
+        btnPay.setEnabled(enabled);
+        btnPay.setAlpha(enabled ? 1.0f : 0.5f);
+    }
+
+    private String formatPrice(double amount) {
+        return String.format(Locale.getDefault(), "$%.2f", amount);
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
